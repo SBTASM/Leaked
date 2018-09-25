@@ -2,6 +2,18 @@
 import os
 import colorama
 import leakz
+import requests
+
+def grab_password(email):
+    UserAgent = {'User-Agent': 'test-agent'}
+    url  = "https://ghostproject.fr/search.php"
+    data = {"param":email}
+    req = requests.post(url,headers=UserAgent,data=data)
+    result = req.text.split("\\n")
+    if "Error" in req.text or len(result)==2:
+        return False
+    else:
+        return result[1:-1]
 
 try:
     input = raw_input
@@ -44,10 +56,11 @@ def menu():
         print("""\033[96mWhat do you want to check?
     1. Password Hashes      4. Update Leaked?
     2. Hash Leaked          5. About Author
-    3, Email Leaked         6, Exit (or just need Crtl+C)
+    3, Email Leaked         6. Grabb email passwords
+                            7, Exit (or just need Crtl+C)
     """)
 
-        choice = input('Enter your choice (1-6): ')
+        choice = input('Enter your choice (1-7): ')
         if choice == '1':
             password = input('\nEnter or paste a password you want to check: ')
             hashs = leakz.hashes_from_password(password)
@@ -89,6 +102,16 @@ def menu():
             back()
 
         elif choice == '6':
+            email = input('\nEnter or paste a email you want to check: ')
+            emails = grab_password(email)
+            if not emails:
+                print("Passwords not found!")
+                back()
+            else:
+                for email in emails:
+                    print(email)
+            back()
+        elif choice == '7':
             print("\033[93m[+] Don't forget https://GitHackTools.blogspot.com")
             exit(0)
 
